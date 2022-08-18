@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  grafana:
+    image: grafana/grafana:9.0.4
+    volumes:
+      - ./provisioning:/etc/grafana/provisioning
+      - ./dashboards:/var/lib/grafana/dashboards
+      - ./plugins:/var/lib/grafana/plugins
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USERNAME}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+      - NOTIFICATIONS_SLACK_WEBHOOK=${GRAFANA_NOTIFICATIONS_SLACK_WEBHOOK}
+      - NOTIFICATIONS_TELEGRAM_BOT_TOKEN=${GRAFANA_NOTIFICATIONS_TELEGRAM_BOT_TOKEN}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: grafana
+        traefik.http.routers.grafana.entrypoints: https
+        traefik.http.routers.grafana.tls: "true"
+        traefik.http.routers.grafana.tls.certresolver: letsencrypt
+        traefik.http.routers.grafana.rule: Host(`grafana.${SUBDOMAIN}.${DOMAIN}`)
+        traefik.http.services.grafana.loadbalancer.server.port: 3000
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s

@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  graphite:
+    image: graphiteapp/graphite-statsd:1.1.10-3
+    volumes:
+      - ./data:/opt/graphite/storage
+      - ./conf/storage-schemas.conf:/opt/graphite/conf/storage-schemas.conf:ro
+      - ./conf/storage-aggregation.conf:/opt/graphite/conf/storage-aggregation.conf:ro
+      - ./conf/localConfig.js:/opt/statsd/debian/localConfig.js:ro
+    environment:
+      - GRAPHITE_DEBUG=true
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: graphite
+        traefik.http.routers.graphite.entrypoints: https
+        traefik.http.routers.graphite.tls: "true"
+        traefik.http.routers.graphite.tls.certresolver: letsencrypt
+        traefik.http.routers.graphite.rule: Host(`graphite.${SUBDOMAIN}.${DOMAIN}`)
+        traefik.http.services.graphite.loadbalancer.server.port: 80
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s

@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  root:
+    image: nginx:1.23-alpine
+    volumes:
+      - ./nginx:/etc/nginx/conf.d:ro
+      - ./static:/var/www/static:ro
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: root
+        traefik.http.routers.root.entrypoints: https
+        traefik.http.routers.root.tls: "true"
+        traefik.http.routers.root.tls.certresolver: letsencrypt
+        traefik.http.routers.root.rule: Host(`${DOMAIN}`)
+        traefik.http.services.root.loadbalancer.server.port: 80
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: curl --fail http://localhost/ || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 12

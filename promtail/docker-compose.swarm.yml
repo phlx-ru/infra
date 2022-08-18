@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  promtail:
+    image: grafana/promtail:k59-757eeac
+    volumes:
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+      - ./positions:/var/lib/promtail/positions
+      - ./promtail.yml:/etc/promtail/promtail.yml
+    command:
+      - "-config.file=/etc/promtail/promtail.yml"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "false"
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s

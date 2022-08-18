@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  registry:
+    image: registry:2.8
+    volumes:
+      - ./data:/data
+      - ./auth:/auth
+    environment:
+      - REGISTRY_AUTH=htpasswd
+      - REGISTRY_AUTH_HTPASSWD_REALM=Registry
+      - REGISTRY_AUTH_HTPASSWD_PATH=/auth/auth
+      - REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY=/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: registry
+        traefik.http.routers.registry.entrypoints: https
+        traefik.http.routers.registry.tls: "true"
+        traefik.http.routers.registry.tls.certresolver: letsencrypt
+        traefik.http.routers.registry.rule: Host(`registry.${SUBDOMAIN}.${DOMAIN}`)
+        traefik.http.services.registry.loadbalancer.server.port: 5000
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5000/ || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 12
+

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/v7.5.1/docs/sources/developers/plugins/plugin.schema.json",
+  "alerting": true,
+  "annotations": true,
+  "backend": true,
+  "dependencies": {
+    "grafanaDependency": "\u003e=7.5.1",
+    "grafanaVersion": "7.5.x",
+    "plugins": []
+  },
+  "executable": "gpx_sentry-datasource",
+  "id": "grafana-sentry-datasource",
+  "info": {
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com"
+    },
+    "build": {
+      "time": 1644248516117,
+      "repo": "https://github.com/grafana/sentry-datasource",
+      "branch": "main",
+      "hash": "6a2ddfab1540f702f83d4736cb71ff984a4dc288",
+      "build": 80
+    },
+    "description": "Grafana datasource plugin for Sentry",
+    "keywords": [
+      "Sentry",
+      "Application monitoring",
+      "Error tracking"
+    ],
+    "links": [],
+    "logos": {
+      "large": "img/sentry-large.svg",
+      "small": "img/sentry-small.svg"
+    },
+    "screenshots": [],
+    "updated": "2022-02-07",
+    "version": "1.0.1"
+  },
+  "metrics": true,
+  "name": "Sentry",
+  "type": "datasource"
+}

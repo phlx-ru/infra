@@ -1,0 +1,26 @@
+# config file version
+apiVersion: 1
+
+notifiers:
+  - name: telemetry-slack-test-notify
+    type: slack
+    org_name: Main Org.
+    is_default: true
+    uid: DJ93A2B7z
+    settings:
+      uploadImage: true
+    secure_settings:
+      url: $NOTIFICATIONS_SLACK_WEBHOOK
+
+  - name: Telegram Default Notifier
+    type: telegram
+    uid: notifier-telegram-default
+    is_default: true
+    send_reminder: true
+    frequency: 1h
+    disable_resolve_message: false
+    settings:
+      chatid: "2078308"
+      uploadImage: true
+    secure_settings:
+      bottoken: $NOTIFICATIONS_TELEGRAM_BOT_TOKEN

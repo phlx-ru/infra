@@ -1,0 +1,48 @@
+version: "3.9"
+
+services:
+  portainer:
+    image: portainer/portainer-ce:2.14.1-alpine
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+    command:
+      - --admin-password=${PORTAINER_PASSWORD}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: 10m
+        max-file: "3"
+        tag: "{{.ImageName}}|{{.Name}}|{{.ID}}"
+    deploy:
+      labels:
+        traefik.enable: "true"
+        traefik.backend: portainer
+        traefik.http.routers.portainer.entrypoints: https
+        traefik.http.routers.portainer.tls: "true"
+        traefik.http.routers.portainer.tls.certresolver: letsencrypt
+        traefik.http.routers.portainer.rule: Host(`portainer.${SUBDOMAIN}.${DOMAIN}`)
+        traefik.http.services.portainer.loadbalancer.server.port: 9000
+      placement:
+        constraints:
+          - "node.labels.cluster==swarm"
+      mode: replicated
+      replicas: 1
+      update_config:
+        parallelism: 1
+        order: start-first
+        failure_action: rollback
+        delay: 10s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
+      restart_policy:
+        condition: any
+        delay: 5s
+        max_attempts: 3
+        window: 120s
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:9000/ || exit 1
+      interval: 30s
+      timeout: 3s
+      retries: 12
