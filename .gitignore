@@ -23,3 +23,5 @@ registry/auth
 !registry/auth/.gitkeep
 traefik/logs
 !traefik/logs/.gitkeep
+postgres/data
+!postgres/data/.gitkeep
