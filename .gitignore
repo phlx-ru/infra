@@ -25,3 +25,5 @@ traefik/logs
 !traefik/logs/.gitkeep
 postgres/data
 !postgres/data/.gitkeep
+jaeger/data
+!jaeger/data/.gitkeep

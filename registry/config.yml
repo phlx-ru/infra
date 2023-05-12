@@ -1,0 +1,32 @@
+version: 0.1
+log:
+  accesslog:
+    disabled: true
+  level: warn
+  formatter: text
+  fields:
+    service: registry
+    environment: staging
+storage:
+  filesystem:
+    rootdirectory: /data
+    maxthreads: 100
+  delete:
+    enabled: true
+  redirect:
+    disable: false
+  cache:
+    blobdescriptor: redis
+    blobdescriptorsize: 10000
+  maintenance:
+    uploadpurging:
+      enabled: true
+      age: 24h
+      interval: 24h
+      dryrun: false
+    readonly:
+      enabled: false
+auth:
+  htpasswd:
+    realm: Registry
+    path: /auth/auth

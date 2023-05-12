@@ -46,7 +46,7 @@ logrotate: ## Makes logrotate configs for logs
 
 .PHONY: disk-usage
 disk-usage: ## Prints disk usage by predefined directories
-	@sudo du -hs graphite/data loki/data portainer/data promtail/positions registry/data /var/log
+	@sudo du -hs graphite/data loki/data portainer/data promtail/positions registry/data jaeger/data /var/log
 
 .PHONY: go-env
 go-env: ## Add Go binaries to PATH making it accessible after `go install ...`
@@ -55,6 +55,10 @@ go-env: ## Add Go binaries to PATH making it accessible after `go install ...`
 .PHONY: postgres
 postgres: ## deploy postgres
 	@bash ./deploy.sh postgres
+
+.PHONY: jaeger
+jaeger: ## deploy jaeger all-in-one
+	@bash ./deploy.sh jaeger
 
 .PHONY: root
 root: ## deploy root

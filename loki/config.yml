@@ -42,5 +42,5 @@ chunk_store_config:
 
 table_manager:
   # if you need delete logs
-  retention_deletes_enabled: false
-  retention_period: 0
+  retention_deletes_enabled: true
+  retention_period: 72h
